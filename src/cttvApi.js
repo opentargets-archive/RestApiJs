@@ -1,3 +1,5 @@
+var apijs = require("tnt.api");
+
 var http = require("httpplease");
 var promises = require('httpplease-promises');
 var Promise = require('es6-promise').Promise;
@@ -6,19 +8,6 @@ jsonHttp = http.use(json).use(promises(Promise));
 http = http.use(promises(Promise));
 
 var cttvApi = function () {
-    // prefixes
-    var prefix = "https://beta.targetvalidation.org/api/latest/";
-    var prefixFilterby = "filterby?";
-    var prefixAssociations = "association?";
-    var prefixSearch = "search?";
-    var prefixGene = "gene/";
-    var prefixDisease = "disease/"; // updated from "efo" to "disease"
-    var prefixToken = "auth/request_token?";
-    var prefixAutocomplete = "autocomplete?";
-    var prefixQuickSearch = "quicksearch?";
-    var prefixExpression = "expression?";
-    var prefixProxy = "proxy/generic/";
-    var prefixTarget = "target/"; // this replaces prefixGene
 
     var credentials = {
         token : "",
@@ -26,8 +15,9 @@ var cttvApi = function () {
         secret : ""
     };
 
-    var onError = function (err) {
-        console.log(err);
+    var config = {
+        verbose: false,
+        prefix: "https://www.targetvalidation.org/api/latest/"
     };
 
     var getToken = function () {
@@ -54,12 +44,12 @@ var cttvApi = function () {
             }, callback);
         }
         if (!credentials.token) {
-            //		    console.log("No credential token, requesting one...");
+            console.log("No credential token, requesting one...");
 
             return getToken()
                 .then(function (resp) {
-                    //console.log("   ======>> Got a new token: " + resp.body.token);
-                    //credentials.token = resp.body.token;
+                    console.log("   ======> Got a new token: " + resp.body.token);
+                    credentials.token = resp.body.token;
                     var headers = {
                         "Auth-token": resp.body.token
                     };
@@ -74,14 +64,14 @@ var cttvApi = function () {
                         myPromise = jsonHttp.get ({
                             "url": myurl,
                             "headers": headers
-                        }, callback).catch(onError);
+                        }, callback);
 
                     }
                     return myPromise;
 
                 });
         } else {
-            //		    console.log("Current token is: " + credentials.token);
+            console.log("Current token is: " + credentials.token);
             return jsonHttp.get({
                 "url" : myurl,
                 "headers": {
@@ -89,103 +79,82 @@ var cttvApi = function () {
                 }
             }, callback).catch(function (err) {
                 // Logic to deal with expired tokens
-                // console.log("     --- Received an api error -- Possibly the token has expired, so I'll request a new one");
-                onError(err);
-                credentials.token = "";
-                return _.call(myurl, callback, data);
+                if (err.status === 401){
+                    console.log("     --- Received an api error -- Possibly the token has expired (401), so I'll request a new one: ");
+
+                    credentials.token = "";
+                    return _.call(myurl, callback, data);
+                } else {
+                    throw err;
+                }
             });
         }
     };
 
-    _.onError = function (cbak) {
-        if (!arguments.length) {
-            return onError;
-        }
-        onError = cbak;
-        return this;
-    };
-
-    // Credentials API
-    _.appname = function (name) {
-        if (!arguments.length) {
-            return credentials.appname;
-        }
-        credentials.appname = name;
-        return this;
-    };
-
-    _.secret = function (sec) {
-        if (!arguments.length) {
-            return credentials.secret;
-        }
-        credentials.secret = sec;
-        return this;
-    };
-
-    _.token = function (tok) {
-        if (!arguments.length) {
-            return credentials.token;
-        }
-        credentials.token = tok;
-        return this;
-    };
-
-    // getter / setter for REST api prefix (TODO: Call it domain?)
-    _.prefix = function (dom) {
-        if (!arguments.length) {
-            return prefix;
-        }
-        prefix = dom;
-        return this;
-    };
+    apijs(_)
+        .getset(credentials)
+        .getset(config);
 
     // URL object
     _.url = {};
 
+    // prefixes
+    var prefixFilterby = "public/evidence/filterby?";
+    var prefixAssociations = "public/association/filterby?";
+    var prefixSearch = "public/search?";
+    var prefixGene = "private/target/";
+    var prefixDisease = "private/disease/"; // updated from "efo" to "disease"
+    var prefixToken = "public/auth/request_token?";
+    var prefixAutocomplete = "private/autocomplete?";
+    var prefixQuickSearch = "private/quicksearch?";
+    var prefixExpression = "private/expression?";
+    var prefixProxy = "proxy/generic/";
+    var prefixTarget = "private/target/"; // this replaces prefixGene
+
     _.url.gene = function (obj) {
-        return prefix + prefixGene + obj.gene_id;
+        return config.prefix + prefixGene + obj.gene_id;
     };
 
     _.url.target = function (obj) {
-        return prefix + prefixTarget + obj.target_id;
+        return config.prefix + prefixTarget + obj.target_id;
     };
 
     _.url.disease = function (obj) {
-        return prefix + prefixDisease + obj.code;
+        return config.prefix + prefixDisease + obj.code;
     };
 
     _.url.search = function (obj) {
-        return prefix + prefixSearch + parseUrlParams(obj);
+        return config.prefix + prefixSearch + parseUrlParams(obj);
     };
 
     _.url.associations = function (obj) {
-        return prefix + prefixAssociations + parseUrlParams(obj);
+        return config.prefix + prefixAssociations + parseUrlParams(obj);
     };
 
 
     _.url.filterby = function (obj) {
-        return prefix + prefixFilterby + parseUrlParams(obj);
+        return config.prefix + prefixFilterby + parseUrlParams(obj);
     };
 
 
     _.url.requestToken = function (obj) {
-        return prefix + prefixToken + "appname=" + obj.appname + "&secret=" + obj.secret;
+        return config.prefix + prefixToken + "appname=" + obj.appname + "&secret=" + obj.secret;
     };
 
     _.url.autocomplete = function (obj) {
-        return prefix + prefixAutocomplete + parseUrlParams(obj);
+        return config.prefix + prefixAutocomplete + parseUrlParams(obj);
     };
 
     _.url.quickSearch = function (obj) {
-        return prefix + prefixQuickSearch + parseUrlParams(obj);
+        return config.prefix + prefixQuickSearch + parseUrlParams(obj);
     };
 
     _.url.expression = function (obj) {
-        return prefix + prefixExpression + parseUrlParams(obj);
+        return config.prefix + prefixExpression + parseUrlParams(obj);
     };
 
     _.url.proxy = function (obj) {
-        return prefix + prefixProxy + obj.url;
+        return config.prefix + prefixProxy + obj.url;
     };
 
 

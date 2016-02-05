@@ -33,6 +33,7 @@
   "dependencies": {
     "es6-promise": "^2.0.1",
     "httpplease": "^0.15.2",
-    "httpplease-promises": "^0.3.0"
+    "httpplease-promises": "^0.3.0",
+    "tnt.api": "^0.1.1"
   }
 }
