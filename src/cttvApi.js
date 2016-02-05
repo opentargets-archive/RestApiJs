@@ -12,7 +12,8 @@ var cttvApi = function () {
     var credentials = {
         token : "",
         appname : "",
-        secret : ""
+        secret : "",
+        expiry : undefined
     };
 
     var config = {
@@ -32,7 +33,10 @@ var cttvApi = function () {
     _.call = function (myurl, callback, data) {
         // No auth
         if ((!credentials.token) && (!credentials.appname) && (!credentials.secret)) {
-            console.log("    CttvApi running in non-authentication mode");
+            if (config.verbose) {
+                console.log("    CttvApi running in non-authentication mode");
+            }
+
             if (data){ // post
                 return jsonHttp.post({
                     "url": myurl,
@@ -44,11 +48,15 @@ var cttvApi = function () {
             }, callback);
         }
         if (!credentials.token) {
-            console.log("No credential token, requesting one...");
+            if (config.verbose) {
+                console.log("No credential token, requesting one...");
+            }
 
             return getToken()
                 .then(function (resp) {
-                    console.log("   ======> Got a new token: " + resp.body.token);
+                    if (config.verbose) {
+                        console.log("   ======> Got a new token: " + resp.body.token);
+                    }
                     credentials.token = resp.body.token;
                     var headers = {
                         "Auth-token": resp.body.token
@@ -71,7 +79,10 @@ var cttvApi = function () {
 
                 });
         } else {
-            console.log("Current token is: " + credentials.token);
+            if (config.verbose) {
+                console.log("Current token is: " + credentials.token);
+            }
+
             return jsonHttp.get({
                 "url" : myurl,
                 "headers": {
@@ -80,7 +91,9 @@ var cttvApi = function () {
             }, callback).catch(function (err) {
                 // Logic to deal with expired tokens
                 if (err.status === 401){
-                    console.log("     --- Received an api error -- Possibly the token has expired (401), so I'll request a new one: ");
+                    if (config.verbose) {
+                        console.log("     --- Received an api error -- Possibly the token has expired (401), so I'll request a new one: ");
+                    }
 
                     credentials.token = "";
                     return _.call(myurl, callback, data);
@@ -131,14 +144,12 @@ var cttvApi = function () {
         return config.prefix + prefixAssociations + parseUrlParams(obj);
     };
 
-
     _.url.filterby = function (obj) {
         return config.prefix + prefixFilterby + parseUrlParams(obj);
     };
 
-
     _.url.requestToken = function (obj) {
-        return config.prefix + prefixToken + "appname=" + obj.appname + "&secret=" + obj.secret;
+        return config.prefix + prefixToken + "appname=" + obj.appname + "&secret=" + obj.secret + (credentials.expiry ? ("&expiry=" + credentials.expiry) : "" );
     };
 
     _.url.autocomplete = function (obj) {

@@ -3,13 +3,9 @@ var cttvApi = require("../../index.js");
 var api = cttvApi()
     .prefix("http://test.targetvalidation.org:8008/api/latest/")
     .appname("cttv-web-app")
-    .secret("2J23T20O31UyepRj7754pEA2osMOYfFK");
-
-var expiry = 1;
-// overwrite requestToken url using expiry;
-api.url.requestToken = function (obj) {
-    return api.prefix() + "public/auth/request_token?appname=" + obj.appname + "&secret=" + obj.secret + "&expiry=" + expiry;
-};
+    .secret("2J23T20O31UyepRj7754pEA2osMOYfFK")
+    .expiry(1)
+    .verbose(true);
 
 var url = api.url.associations({
     target: "ENSG00000102780"
