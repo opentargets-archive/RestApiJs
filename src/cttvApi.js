@@ -30,7 +30,7 @@ var cttvApi = function () {
     };
 
     var _ = {};
-    _.call = function (myurl, callback, data) {
+    _.call = function (myurl, data) {
         // No auth
         if ((!credentials.token) && (!credentials.appname) && (!credentials.secret)) {
             if (config.verbose) {
@@ -45,7 +45,7 @@ var cttvApi = function () {
             }
             return jsonHttp.get({
                 "url" : myurl
-            }, callback);
+            });
         }
         if (!credentials.token) {
             if (config.verbose) {
@@ -72,7 +72,7 @@ var cttvApi = function () {
                         myPromise = jsonHttp.get ({
                             "url": myurl,
                             "headers": headers
-                        }, callback);
+                        });
 
                     }
                     return myPromise;
@@ -88,7 +88,7 @@ var cttvApi = function () {
                 "headers": {
                     "Auth-token": credentials.token
                 }
-            }, callback).catch(function (err) {
+            }).catch(function (err) {
                 // Logic to deal with expired tokens
                 if (err.status === 401){
                     if (config.verbose) {
@@ -96,7 +96,7 @@ var cttvApi = function () {
                     }
 
                     credentials.token = "";
-                    return _.call(myurl, callback, data);
+                    return _.call(myurl, data);
                 } else {
                     throw err;
                 }
@@ -113,7 +113,7 @@ var cttvApi = function () {
 
     // prefixes
     var prefixFilterby = "public/evidence/filterby?";
-    var prefixAssociations = "public/association/filterby?";
+    var prefixAssociations = "public/association/filter?";
     var prefixSearch = "public/search?";
     var prefixGene = "private/target/";
     var prefixDisease = "private/disease/"; // updated from "efo" to "disease"
@@ -149,7 +149,7 @@ var cttvApi = function () {
     };
 
     _.url.requestToken = function (obj) {
-        return config.prefix + prefixToken + "appname=" + obj.appname + "&secret=" + obj.secret + (credentials.expiry ? ("&expiry=" + credentials.expiry) : "" );
+        return config.prefix + prefixToken + "app_name=" + obj.appname + "&secret=" + obj.secret + (credentials.expiry ? ("&expiry=" + credentials.expiry) : "" );
     };
 
     _.url.autocomplete = function (obj) {
