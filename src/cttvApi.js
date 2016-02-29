@@ -6,6 +6,7 @@ var Promise = require('es6-promise').Promise;
 var json = require("httpplease/plugins/json");
 jsonHttp = http.use(json).use(promises(Promise));
 http = http.use(promises(Promise));
+var structure = require("./structure.js");
 
 var cttvApi = function () {
 
@@ -108,11 +109,16 @@ var cttvApi = function () {
         .getset(credentials)
         .getset(config);
 
+
+    // Utils
+    _.utils = {};
+    _.utils.flat2tree = structure.flat2tree;
+
     // URL object
     _.url = {};
 
     // prefixes
-    var prefixFilterby = "public/evidence/filterby?";
+    var prefixFilterby = "public/evidence/filter?";
     var prefixAssociations = "public/association/filter?";
     var prefixSearch = "public/search?";
     var prefixGene = "private/target/";

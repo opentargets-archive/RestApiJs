@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<head>
+  <script src="../../build/cttv.api.js"></script>
+</head>
+
+<body>
+  <script>
+      var api = cttvApi()
+          .prefix("http://test.targetvalidation.org:8008/api/latest/")
+          .appname("cttv-web-app")
+          .secret("2J23T20O31UyepRj7754pEA2osMOYfFK")
+          .expiry(1)
+          .verbose(true);
+
+      var url = api.url.associations({
+          target: "ENSG00000102780",
+          direct: false
+      });
+
+      api.call(url)
+          .then (function (resp) {
+            //   console.log(resp);
+              console.log(resp.status);
+            //   var tree = api.utils.flat2tree(resp.body);
+            //   console.log("TREE:");
+            //   console.log(tree);
+              setTimeout(function () {
+                  console.log("second call...");
+                  api.call(url)
+                      .then (function (resp) {
+                          console.log(resp.status);
+                      });
+              }, 2000);
+          })
+        //   .catch(function (err) {
+        //       console.log("ERR REceived");
+        //       console.log(err);
+        //   });
+
+      console.log(url);
+  </script>
+</body>
