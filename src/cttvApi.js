@@ -11,7 +11,7 @@ var structure = require("./structure.js");
 var cttvApi = function () {
 
     var credentials = {
-        token : "",
+        token : undefined, // is a promise or a string
         appname : "",
         secret : "",
         expiry : undefined
@@ -19,15 +19,19 @@ var cttvApi = function () {
 
     var config = {
         verbose: false,
-        prefix: "https://www.targetvalidation.org/api/latest/"
+        prefix: "https://www.targetvalidation.org/api/",
+        version: "1.1"
     };
 
     var getToken = function () {
         var tokenUrl = _.url.requestToken(credentials);
-        //console.log("TOKEN URL: " + tokenUrl);
-        return jsonHttp.get({
+        credentials.token = jsonHttp.get({
             "url": tokenUrl
         });
+        return credentials.token;
+        // return jsonHttp.get({
+        //     "url": tokenUrl
+        // });
     };
 
     var _ = {};
@@ -44,65 +48,104 @@ var cttvApi = function () {
                     "body": data
                 });
             }
+
             return jsonHttp.get({
                 "url" : myurl
             });
         }
+        // Auth - but not token
         if (!credentials.token) {
             if (config.verbose) {
                 console.log("No credential token, requesting one...");
             }
 
             return getToken()
-                .then(function (resp) {
-                    if (config.verbose) {
-                        console.log("   ======> Got a new token: " + resp.body.token);
-                    }
-                    credentials.token = resp.body.token;
-                    var headers = {
-                        "Auth-token": resp.body.token
-                    };
-                    var myPromise;
-                    if (data) { // post
-                        myPromise = jsonHttp.post ({
-                            "url": myurl,
-                            "headers": headers,
-                            "body": data
-                        });
-                    } else { // get
-                        myPromise = jsonHttp.get ({
-                            "url": myurl,
-                            "headers": headers
-                        });
-
-                    }
-                    return myPromise;
-
-                });
+                .then(callApi)
+                .catch(catchErr);
+        // Auth & token
         } else {
             if (config.verbose) {
                 console.log("Current token is: " + credentials.token);
             }
-
-            return jsonHttp.get({
-                "url" : myurl,
-                "headers": {
-                    "Auth-token": credentials.token
-                }
-            }).catch(function (err) {
-                // Logic to deal with expired tokens
-                if (err.status === 401){
-                    if (config.verbose) {
-                        console.log("     --- Received an api error -- Possibly the token has expired (401), so I'll request a new one: ");
+            var tokenPromise = new Promise (function (resolve) {
+                resolve ({
+                    body: {
+                        token: credentials.token
                     }
-
-                    credentials.token = "";
-                    return _.call(myurl, data);
-                } else {
-                    throw err;
-                }
+                });
             });
+            if (typeof credentials.token !== "string") { // The token is still a string
+                tokenPromise = credentials.token;
+            }
+
+            return tokenPromise
+                .then (function () {
+                    return jsonHttp.get({
+                        "url" : myurl,
+                        "headers": {
+                            "Auth-token": credentials.token
+                        }
+                    })
+                    .catch(catchErr);
+                });
         }
+
+        function callApi (resp) {
+            if (config.verbose) {
+                console.log("   ======> Got a new token: " + resp.body.token);
+            }
+            credentials.token = resp.body.token;
+            var headers = {
+                "Auth-token": resp.body.token
+            };
+            var myPromise;
+            if (data) { // post
+                myPromise = jsonHttp.post ({
+                    "url": myurl,
+                    "headers": headers,
+                    "body": data
+                });
+            } else { // get
+                myPromise = jsonHttp.get ({
+                    "url": myurl,
+                    "headers": headers
+                });
+
+            }
+            return myPromise;
+        }
+
+        function catchErr (err) {
+            // Logic to deal with expired tokens
+            switch (err.status) {
+                case (419) : // Token expired
+                if (config.verbose) {
+                    console.log("     --- Received an api error -- Possibly the token has expired (" + err.status + "), so I'll request a new one");
+                }
+                if (typeof credentials.token === "string" ) {
+                    credentials.token = undefined;
+                }
+                return _.call(myurl, data);
+
+                case (429) : // Too many calls
+                if (config.verbose) {
+                    console.log("     --- Received an api error -- Probably too many calls made to the api (" + err.status + "), so I'll wait some time to fetch the data");
+                }
+                var delayedPromise = new Promise (function (resolve) {
+                    setTimeout(function (){
+                        if (config.verbose) {
+                            console.log(" *** trying again after receiving a too many requests error");
+                        }
+                        resolve(_.call(myurl, data));
+                    }, 10000);
+                });
+                return delayedPromise;
+
+                default:
+                throw err;
+            }
+        }
+
     };
 
     apijs(_)
@@ -131,47 +174,47 @@ var cttvApi = function () {
     var prefixTarget = "private/target/"; // this replaces prefixGene
 
     _.url.gene = function (obj) {
-        return config.prefix + prefixGene + obj.gene_id;
+        return config.prefix + config.version + "/" + prefixGene + obj.gene_id;
     };
 
     _.url.target = function (obj) {
-        return config.prefix + prefixTarget + obj.target_id;
+        return config.prefix + config.version + "/" + prefixTarget + obj.target_id;
     };
 
     _.url.disease = function (obj) {
-        return config.prefix + prefixDisease + obj.code;
+        return config.prefix + config.version + "/" + prefixDisease + obj.code;
     };
 
     _.url.search = function (obj) {
-        return config.prefix + prefixSearch + parseUrlParams(obj);
+        return config.prefix + config.version + "/" + prefixSearch + parseUrlParams(obj);
     };
 
     _.url.associations = function (obj) {
-        return config.prefix + prefixAssociations + parseUrlParams(obj);
+        return config.prefix + config.version + "/" + prefixAssociations + parseUrlParams(obj);
     };
 
     _.url.filterby = function (obj) {
-        return config.prefix + prefixFilterby + parseUrlParams(obj);
+        return config.prefix + config.version + "/" + prefixFilterby + parseUrlParams(obj);
     };
 
     _.url.requestToken = function (obj) {
-        return config.prefix + prefixToken + "app_name=" + obj.appname + "&secret=" + obj.secret + (credentials.expiry ? ("&expiry=" + credentials.expiry) : "" );
+        return config.prefix + config.version + "/" + prefixToken + "app_name=" + obj.appname + "&secret=" + obj.secret + (credentials.expiry ? ("&expiry=" + credentials.expiry) : "" );
     };
 
     _.url.autocomplete = function (obj) {
-        return config.prefix + prefixAutocomplete + parseUrlParams(obj);
+        return config.prefix + config.version + "/" + prefixAutocomplete + parseUrlParams(obj);
     };
 
     _.url.quickSearch = function (obj) {
-        return config.prefix + prefixQuickSearch + parseUrlParams(obj);
+        return config.prefix + config.version + "/" + prefixQuickSearch + parseUrlParams(obj);
     };
 
     _.url.expression = function (obj) {
-        return config.prefix + prefixExpression + parseUrlParams(obj);
+        return config.prefix + config.version + "/" + prefixExpression + parseUrlParams(obj);
     };
 
     _.url.proxy = function (obj) {
-        return config.prefix + prefixProxy + obj.url;
+        return config.prefix + config.version + "/" + prefixProxy + obj.url;
     };
 
 

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<head>
+  <script src="../../build/cttv.api.js"></script>
+</head>
+
+<body>
+  <script>
+      var api = cttvApi()
+          .prefix("http://test.targetvalidation.org:8008/api/")
+          .appname("cttv-web-app")
+          .secret("2J23T20O31UyepRj7754pEA2osMOYfFK")
+        //   .expiry(1)
+          .verbose(true);
+
+      var url = api.url.associations({
+          target: "ENSG00000102780",
+          direct: false,
+          nocache: true
+      });
+      var url2 = api.url.associations({
+          target: "ENSG00000136997",
+          direct: false,
+          nocache: true
+      });
+      var url3 = api.url.associations({
+          target: "ENSG00000136997",
+          direct: true,
+          nocache: true
+      })
+
+      api.call(url)
+          .then (function (resp) {
+              console.log("1 -- " + resp.status + " (" + resp.body.total + ")");
+            //   console.log(resp);
+          });
+
+      api.call(url2)
+          .then (function (resp) {
+              console.log("2 -- " + resp.status + " (" + resp.body.total + ")");
+            //   console.log(resp);
+          });
+
+    console.log("Calling some times...");
+    for (var i=3; i<11; i++) {
+        (function (i) {api.call(url2)
+            .then (function (resp) {
+                console.log(i + " -- " + resp.status+ " (" + resp.body.total + ")");
+                //console.log(resp);
+            });
+        })(i)
+    }
+
+    // setTimeout(function () {
+    //     api.call(url3)
+    //         .then (function (resp) {
+    //             console.log("Last 1 -- " + resp.status + " (" + resp.body.total + ")");
+    //             console.log(resp);
+    //     });
+    //     api.call(url3)
+    //         .then (function (resp) {
+    //             console.log("Last 2 -- " + resp.status + " (" + resp.body.total + ")");
+    //             console.log(resp);
+    //     });
+    // }, 5000);
+
+
+  </script>
+</body>
