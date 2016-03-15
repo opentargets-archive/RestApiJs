@@ -71,17 +71,19 @@ function addNode (node, tree, tas, index) {
 
         // If the parent is cttv_root and the node is not a therapeutic area (path.length > 2) we search for the TA in the set of TAs
         if ((parent.__id === rootId) && (path.length > 2)) {
-            var ta = tas[node.__id];
+            var taId = node.target.id + "-" + path[1];
+            var ta = tas[taId];
             if (!ta) {
                 ta = {};
+                ta.__name = ta.disease.name;
+                ta.name = ta.disease.name;
                 ta.disease = {};
                 ta.disease.id = path[1];
                 ta.disease.name = path[1];
             }
             ta.__id = path[1];
-            // var ta = {};
-            // ta.id = path[1];
-            // ta.name = findTAname(path[1], node);
+            ta.__name = ta.disease.name;
+            ta.name = ta.disease.name;
             if (!tree.children) {
                 tree.children = [];
             }
