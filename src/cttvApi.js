@@ -79,15 +79,18 @@ var cttvApi = function () {
             }
 
             return tokenPromise
-                .then (function () {
-                    return jsonHttp.get({
-                        "url" : myurl,
-                        "headers": {
-                            "Auth-token": credentials.token
-                        }
-                    })
-                    .catch(catchErr);
-                });
+                // .then (function () {
+                //     return callApi
+                //     // return jsonHttp.get({
+                //     //     "url" : myurl,
+                //     //     "headers": {
+                //     //         "Auth-token": credentials.token
+                //     //     }
+                //     // })
+                //     .catch(catchErr);
+                .then (callApi)
+                .catch(catchErr);
+                // });
         }
 
         function callApi (resp) {
@@ -169,7 +172,7 @@ var cttvApi = function () {
     var prefixToken = "public/auth/request_token?";
     var prefixAutocomplete = "private/autocomplete?";
     var prefixQuickSearch = "private/quicksearch?";
-    var prefixExpression = "private/expression?";
+    var prefixExpression = "private/target/expression?";
     var prefixProxy = "proxy/generic/";
     var prefixTarget = "private/target/"; // this replaces prefixGene
 
