@@ -10,6 +10,8 @@ var structure = require("./structure.js");
 
 var cttvApi = function () {
 
+    var req; // can be json or not
+
     var credentials = {
         token : undefined, // is a promise or a string
         appname : "",
@@ -20,7 +22,8 @@ var cttvApi = function () {
     var config = {
         verbose: false,
         prefix: "https://www.targetvalidation.org/api/",
-        version: "1.1"
+        version: "1.1",
+        format: "json"
     };
 
     var getToken = function () {
@@ -29,13 +32,21 @@ var cttvApi = function () {
             "url": tokenUrl
         });
         return credentials.token;
-        // return jsonHttp.get({
-        //     "url": tokenUrl
-        // });
     };
 
     var _ = {};
-    _.call = function (myurl, data) {
+    _.call = function (myurl, data, format) {
+        // Response format json or not
+        if (!format) {
+            format = "json";
+        }
+        console.warn("FORMAT IS " + format);
+        if (format === "json") {
+            req = jsonHttp;
+        } else {
+            req = http;
+        }
+
         // No auth
         if ((!credentials.token) && (!credentials.appname) && (!credentials.secret)) {
             if (config.verbose) {
@@ -43,16 +54,17 @@ var cttvApi = function () {
             }
 
             if (data){ // post
-                return jsonHttp.post({
+                return req.post({
                     "url": myurl,
                     "body": data
                 });
             }
 
-            return jsonHttp.get({
+            return req.get({
                 "url" : myurl
             });
         }
+
         // Auth - but not token
         if (!credentials.token) {
             if (config.verbose) {
@@ -103,13 +115,13 @@ var cttvApi = function () {
             };
             var myPromise;
             if (data) { // post
-                myPromise = jsonHttp.post ({
+                myPromise = req.post ({
                     "url": myurl,
                     "headers": headers,
                     "body": data
                 });
             } else { // get
-                myPromise = jsonHttp.get ({
+                myPromise = req.get ({
                     "url": myurl,
                     "headers": headers
                 });

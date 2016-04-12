@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<head>
+  <script src="../../build/cttv.api.js"></script>
+</head>
+
+<body>
+  <script>
+      var api = cttvApi()
+          .prefix("http://test.targetvalidation.org:8111/api/")
+          .appname("cttv-web-app")
+          .secret("2J23T20O31UyepRj7754pEA2osMOYfFK")
+        //   .expiry(1)
+          .verbose(true);
+
+      var url = api.url.associations({
+          target: "ENSG00000166167",
+          direct: true,
+          outputstructure: "flat",
+          facets: false,
+          size: 1000,
+          therapeutic_area: "efo_0001379"
+      });
+
+      api.call(url)
+          .then (function (resp) {
+              console.log(resp.status);
+              var tree = api.utils.flat2tree(resp.body);
+        });
+      console.log(url);
+  </script>
+</body>
