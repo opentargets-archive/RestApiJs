@@ -40,7 +40,6 @@ var cttvApi = function () {
         if (!format) {
             format = "json";
         }
-        console.warn("FORMAT IS " + format);
         if (format === "json") {
             req = jsonHttp;
         } else {

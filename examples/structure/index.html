@@ -7,19 +7,19 @@
 <body>
   <script>
       var api = cttvApi()
-          .prefix("http://test.targetvalidation.org:8111/api/")
+          .prefix("http://test.targetvalidation.org:8008/api/")
           .appname("cttv-web-app")
-          .secret("2J23T20O31UyepRj7754pEA2osMOYfFK")
+          .secret("2J23T20O31UyepRj7754pEA2osMOYfFK");
         //   .expiry(1)
-          .verbose(true);
+        //   .verbose(true);
 
       var url = api.url.associations({
-          target: "ENSG00000166167",
+          target: "ENSG00000132170",
           direct: true,
           outputstructure: "flat",
           facets: false,
           size: 1000,
-          therapeutic_area: "efo_0001379"
+          therapeutic_area: "efo_0000651"
       });
 
       api.call(url)

@@ -63,7 +63,7 @@ function addNode (node, tree, tas) {
     node.__evidence_count = node.evidence_count.total;
     var path = node.currPath;
 
-    var parent = findParent(path, tree);
+    var parent = findParent(path, tree, node);
     delete(node.currPath);
 
     // If the parent is cttv_root and the node is not a therapeutic area (path.length > 2) we search for the TA in the set of TAs
@@ -90,7 +90,19 @@ function addNode (node, tree, tas) {
         parent.children = [];
     }
 
+    // Only push the child if it is not there
+    if (!hasTwin(parent.children, node)) {
         parent.children.push(node);
+    }
+}
+
+function hasTwin (siblings, himself) {
+    for (var i=0; i<siblings.length; i++) {
+        if (siblings[i].__id === himself.__id) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function getTAs (arr) {
@@ -102,14 +114,15 @@ function getTAs (arr) {
     return tas;
 }
 
-function findParent (path, tree) {
+function findParent (path, tree, myself) {
+    debugger;
     var children = tree.children || [];
     for (var i=0; i<path.length; i++) {
         var found = false;
         FINDINCHILDREN:
         for (var j=0; j<children.length; j++) {
             var child = children[j];
-            if (child.__id === path[i]) {
+            if ((child.__id === path[i]) && (child.__id !== myself.__id)) {
                 tree = child;
                 children = child.children || [];
                 found = true;
