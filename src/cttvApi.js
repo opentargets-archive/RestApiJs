@@ -186,6 +186,8 @@ var cttvApi = function () {
     var prefixExpression = "private/target/expression?";
     var prefixProxy = "proxy/generic/";
     var prefixTarget = "private/target/"; // this replaces prefixGene
+    var prefixTargetRelation = "private/relation/target/";
+    var prefixDiseaseRelation = "private/relation/disease/";
 
     _.url.gene = function (obj) {
         return config.prefix + config.version + "/" + prefixGene + obj.gene_id;
@@ -231,7 +233,13 @@ var cttvApi = function () {
         return config.prefix + config.version + "/" + prefixProxy + obj.url;
     };
 
+    _.url.targetRelation = function(obj){
+        return config.prefix + config.version + "/" + prefixTargetRelation + obj.id;
+    };
 
+    _.url.diseaseRelation = function(obj){
+        return config.prefix + config.version + "/" + prefixDiseaseRelation + obj.id;
+    };
 
     /**
     * This takes a params object and returns the params concatenated in a string.
