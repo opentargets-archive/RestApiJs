@@ -115,7 +115,6 @@ function getTAs (arr) {
 }
 
 function findParent (path, tree, myself) {
-    debugger;
     var children = tree.children || [];
     for (var i=0; i<path.length; i++) {
         var found = false;
