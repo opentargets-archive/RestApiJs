@@ -238,7 +238,9 @@ var cttvApi = function () {
     };
 
     _.url.diseaseRelation = function(obj){
-        return config.prefix + config.version + "/" + prefixDiseaseRelation + obj.id;
+        var id = obj.id;
+        delete(obj.id);
+        return config.prefix + config.version + "/" + prefixDiseaseRelation + id + "?" + parseUrlParams(obj);
     };
 
     /**
