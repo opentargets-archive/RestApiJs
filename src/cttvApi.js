@@ -22,7 +22,7 @@ var cttvApi = function () {
     var config = {
         verbose: false,
         prefix: "https://www.targetvalidation.org/api/",
-        version: "1.1",
+        version: "1.2",
         format: "json"
     };
 
