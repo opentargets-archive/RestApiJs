@@ -188,6 +188,7 @@ var cttvApi = function () {
     var prefixTarget = "private/target/"; // this replaces prefixGene
     var prefixTargetRelation = "private/relation/target/";
     var prefixDiseaseRelation = "private/relation/disease/";
+    var prefixLogSession = "private/utils/logevent/";
 
     _.url.gene = function (obj) {
         return config.prefix + config.version + "/" + prefixGene + obj.gene_id;
@@ -241,6 +242,10 @@ var cttvApi = function () {
         var id = obj.id;
         delete(obj.id);
         return config.prefix + config.version + "/" + prefixDiseaseRelation + id + "?" + parseUrlParams(obj);
+    };
+
+    _.url.logSession = function () {
+        return config.prefix + config.version + "/" + prefixLogSession;
     };
 
     /**
