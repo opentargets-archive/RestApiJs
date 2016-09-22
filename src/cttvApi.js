@@ -43,7 +43,7 @@ var cttvApi = function () {
         if (format === "json") {
             req = jsonHttp;
         } else {
-            req = http;
+            req = jsonHttp;
         }
 
         // No auth
