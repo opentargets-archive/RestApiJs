@@ -3,10 +3,23 @@
 // Given a flat structure of associations
 // convert and return that structure to a tree
 var rootId = "cttv_root";
-var flat2tree = function (data) {
+var childrenProperty = "children";
+
+var flat2tree = function (config) { // cProp -- children property
+    var data;
+    if (angular.isArray(config)) {        
+        data = config;
+    } else {
+        data = config.data;
+        var cProp = config.childrenProperty;
+        if (cProp) {
+            childrenProperty = cProp;
+        }
+    }
     var associations = data.data;
     var therapeuticAreas = data.therapeutic_areas;
-
+    console.log("associations...");
+    console.log(data);
     // Unfold the associations with more than 1 path
     var unfoldedAssociations = unfoldAssoc(associations);
 
@@ -29,8 +42,6 @@ var flat2tree = function (data) {
     for (var i=0; i<sortedAssociations.length; i++) {
         addNode(sortedAssociations[i], tree, tas);
     }
-    console.log("TREE...");
-    console.log(tree);
     return tree;
 };
 
@@ -59,6 +70,7 @@ function addNode (node, tree, tas) {
     node.__id = node.disease.id;
     node.__name = node.disease.efo_info.label;
     node.name = node.disease.efo_info.label;
+    node.label = node.disease.efo_info.label;
     node.__association_score = node.association_score.overall;
     node.__evidence_count = node.evidence_count.total;
     var path = node.currPath;
@@ -76,23 +88,24 @@ function addNode (node, tree, tas) {
         ta.__id = path[0];
         ta.__name = ta.disease.efo_info.label;
         ta.name = ta.disease.efo_info.label;
+        ta.label = ta.disease.efo_info.label;
         ta.__association_score = ta.association_score.overall;
         ta.__evidence_count = ta.evidence_count.total;
 
-        if (!tree.children) {
-            tree.children = [];
+        if (!tree[childrenProperty]) {
+            tree[childrenProperty] = [];
         }
-        tree.children.push(ta);
+        tree[childrenProperty].push(ta);
         parent = ta;
     }
 
-    if (!parent.children) {
-        parent.children = [];
+    if (!parent[childrenProperty]) {
+        parent[childrenProperty] = [];
     }
 
     // Only push the child if it is not there
-    if (!hasTwin(parent.children, node)) {
-        parent.children.push(node);
+    if (!hasTwin(parent[childrenProperty], node)) {
+        parent[childrenProperty].push(node);
     }
 }
 
@@ -115,7 +128,7 @@ function getTAs (arr) {
 }
 
 function findParent (path, tree, myself) {
-    var children = tree.children || [];
+    var children = tree[childrenProperty] || [];
     for (var i=0; i<path.length; i++) {
         var found = false;
         FINDINCHILDREN:
@@ -123,7 +136,7 @@ function findParent (path, tree, myself) {
             var child = children[j];
             if ((child.__id === path[i]) && (child.__id !== myself.__id)) {
                 tree = child;
-                children = child.children || [];
+                children = child[childrenProperty] || [];
                 found = true;
                 break FINDINCHILDREN;
             }
