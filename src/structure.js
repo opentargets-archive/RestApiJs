@@ -7,7 +7,7 @@ var childrenProperty = "children";
 
 var flat2tree = function (config) { // cProp -- children property
     var data;
-    if (angular.isArray(config)) {        
+    if (Array.isArray(config)) {
         data = config;
     } else {
         data = config.data;
