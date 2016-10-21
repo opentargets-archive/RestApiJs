@@ -10,7 +10,7 @@ var flat2tree = function (config) { // cProp -- children property
     if (Array.isArray(config)) {
         data = config;
     } else {
-        data = config.data;
+        data = config;
         var cProp = config.childrenProperty;
         if (cProp) {
             childrenProperty = cProp;
@@ -18,8 +18,6 @@ var flat2tree = function (config) { // cProp -- children property
     }
     var associations = data.data;
     var therapeuticAreas = data.therapeutic_areas;
-    console.log("associations...");
-    console.log(data);
     // Unfold the associations with more than 1 path
     var unfoldedAssociations = unfoldAssoc(associations);
 
@@ -28,11 +26,12 @@ var flat2tree = function (config) { // cProp -- children property
 
     var tree = {
         "__id": rootId,
+        "__key": rootId,
         "name" : "cttv_disease",
         "disease": {
             "id": rootId,
             "efo_info": {
-                "label": ""
+                "label": "cttv root"
             }
         }
     };

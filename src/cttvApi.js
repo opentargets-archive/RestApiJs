@@ -5,7 +5,9 @@ var promises = require('httpplease-promises');
 var Promise = require('es6-promise').Promise;
 var json = require("httpplease/plugins/json");
 jsonHttp = http.use(json).use(promises(Promise));
-http = http.use(promises(Promise));
+var jsonreq = require("httpplease/plugins/jsonrequest");
+jsonReqHttp = http.use(jsonreq).use(promises(Promise));
+// http = http.use(promises(Promise));
 var structure = require("./structure.js");
 
 var cttvApi = function () {
@@ -22,7 +24,7 @@ var cttvApi = function () {
     var config = {
         verbose: false,
         prefix: "https://www.targetvalidation.org/api/",
-        version: "1.1",
+        version: "1.2",
         format: "json"
     };
 
@@ -43,7 +45,7 @@ var cttvApi = function () {
         if (format === "json") {
             req = jsonHttp;
         } else {
-            req = http;
+            req = jsonReqHttp;
         }
 
         // No auth
@@ -55,12 +57,18 @@ var cttvApi = function () {
             if (data){ // post
                 return req.post({
                     "url": myurl,
-                    "body": data
+                    "body": data,
+                    "headers": {
+                        "Accept": "*/*"
+                    }
                 });
             }
 
             return req.get({
-                "url" : myurl
+                "url" : myurl,
+                "headers": {
+                    "Accept": "*/*"
+                }
             });
         }
 
