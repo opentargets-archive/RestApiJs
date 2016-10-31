@@ -140,6 +140,20 @@ var cttvApi = function () {
         function catchErr (err) {
             // Logic to deal with expired tokens
             switch (err.status) {
+                case (401) : // Probably wrong credentials
+                if (err.body.message === "authentication credentials not valid") {
+                    if (config.verbose) {
+                        console.log("    --- Received an api error -- Possibly the credentials are wrong (" + err.status + "), so I'll make the call without credentials");
+                    }
+                    console.warn('wrong authentication appname (' + credentials.appname + ') or secret (' + credentials.secret + ') -- I will remove the credentials and try the same call again');
+                    // Remove credentials and run in non-authentication mode
+                    credentials.appname = undefined;
+                    credentials.secret = undefined;
+                    credentials.token = undefined;
+                    return _.call(myurl, data);
+                }
+                break;
+
                 case (419) : // Token expired
                 if (config.verbose) {
                     console.log("     --- Received an api error -- Possibly the token has expired (" + err.status + "), so I'll request a new one");
