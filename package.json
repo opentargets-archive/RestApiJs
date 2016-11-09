@@ -1,6 +1,6 @@
 {
   "name": "cttv.api",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "javascript interface for the cttv rest api",
   "main": "index.js",
   "directories": {
