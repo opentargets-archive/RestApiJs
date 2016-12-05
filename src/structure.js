@@ -31,7 +31,7 @@ var flat2tree = function (config) { // cProp -- children property
         "disease": {
             "id": rootId,
             "efo_info": {
-                "label": "cttv root"
+                "label": ""
             }
         }
     };
