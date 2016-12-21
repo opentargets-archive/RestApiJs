@@ -219,7 +219,7 @@ var cttvApi = function () {
     };
 
     _.url.target = function (obj) {
-        return config.prefix + config.version + "/" + prefixTarget + obj.target_id;
+        return config.prefix + config.version + "/" + prefixTarget + parseUrlParams(obj);
     };
 
     _.url.disease = function (obj) {
