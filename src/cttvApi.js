@@ -219,6 +219,11 @@ var cttvApi = function () {
     };
 
     _.url.target = function (obj) {
+        console.log("in api / target obj is");
+        console.log(obj);
+        if (obj.target_id) {
+            return config.prefix + config.version + "/" + prefixTarget + obj.target_id;
+        }
         return config.prefix + config.version + "/" + prefixTarget + parseUrlParams(obj);
     };
 
