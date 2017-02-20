@@ -213,6 +213,7 @@ var cttvApi = function () {
     var prefixLogSession = "private/utils/logevent";
     var prefixMultiSearch = "private/besthitsearch?";
     var prefixStats = "public/utils/stats";
+    var prefixTargetsEnrichment = "private/enrichment/targets?";
 
     _.url.gene = function (obj) {
         return config.prefix + config.version + "/" + prefixGene + obj.gene_id;
@@ -281,6 +282,10 @@ var cttvApi = function () {
 
     _.url.stats = function () {
         return config.prefix + config.version + "/" + prefixStats;
+    };
+
+    _.url.targetsEnrichment = function (obj) {
+        return config.prefix + config.version + "/" + prefixTargetsEnrichment + parseUrlParams(obj);
     };
 
     /**
