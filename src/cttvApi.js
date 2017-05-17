@@ -221,10 +221,10 @@ var cttvApi = function () {
 
     _.url.target = function (obj) {
         if (obj && obj.target_id) {
-            var target_id = obj.target_id;
-            delete(obj.target_id);
-            return config.prefix + config.version + "/" + prefixTarget + target_id + '?' + parseUrlParams(obj);
+            // One target
+            return config.prefix + config.version + "/" + prefixTarget + obj.target_id;
         }
+        // Multiple targets (optionally we can specify specific fields)
         return config.prefix + config.version + "/" + prefixTarget + parseUrlParams(obj);
     };
 
