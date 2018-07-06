@@ -2,7 +2,7 @@ var apijs = require("tnt.api");
 
 var http = require("httpplease");
 var promises = require('httpplease-promises');
-var withcredentials = requre('./withcredentials.js');
+var withcredentials = require('./withcredentials.js');
 var Promise = require('es6-promise').Promise;
 var json = require("httpplease/plugins/json");
 jsonHttp = http.use(withcredentials).use(json).use(promises(Promise));
