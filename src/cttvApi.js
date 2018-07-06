@@ -2,11 +2,12 @@ var apijs = require("tnt.api");
 
 var http = require("httpplease");
 var promises = require('httpplease-promises');
+var withcredentials = requre('./withcredentials.js');
 var Promise = require('es6-promise').Promise;
 var json = require("httpplease/plugins/json");
-jsonHttp = http.use(json).use(promises(Promise));
+jsonHttp = http.use(withcredentials).use(json).use(promises(Promise));
 var jsonreq = require("httpplease/plugins/jsonrequest");
-jsonReqHttp = http.use(jsonreq).use(promises(Promise));
+jsonReqHttp = http.use(withcredentials).use(jsonreq).use(promises(Promise));
 // http = http.use(promises(Promise));
 var structure = require("./structure.js");
 
