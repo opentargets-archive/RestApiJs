@@ -12,7 +12,8 @@
   "keywords": [
     "cttv",
     "rest",
-    "api"
+    "api",
+    "opentargets"
   ],
   "repository" :{ 
     "type" : "git",
