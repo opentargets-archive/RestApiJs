@@ -14,6 +14,10 @@
     "rest",
     "api"
   ],
+  "repository" :{ 
+    "type" : "git",
+    "url" : "https://github.com/opentargets/RestApiJs.git"
+  },
   "author": "Miguel Pignatelli <emepyc@gmail.com>",
   "contributors": ["Luca Fumis <luca.fumis@gmail.com>"],
   "license": "MIT",
