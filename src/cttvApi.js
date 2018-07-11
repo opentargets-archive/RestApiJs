@@ -24,8 +24,9 @@ var cttvApi = function () {
 
     var config = {
         verbose: false,
-        prefix: "https://www.targetvalidation.org/api/",
-        version: "1.2",
+        prefix: "https://www.targetvalidation.org",
+        version: "v3",
+        postfix: "platform",
         format: "json"
     };
 
@@ -222,79 +223,94 @@ var cttvApi = function () {
     var prefixStats = "public/utils/stats";
     var prefixTargetsEnrichment = "private/enrichment/targets?";
 
+    /*
+     * Returns the "origin" (inspired by window.location.origin) of the url, which is 
+     * prefix/version/postfix/
+     */
+    var getOrigin = function () {
+        return trim(config.prefix) + '/' + trim(config.version) + '/' + trim(config.postfix) + '/';
+    }
+
+    /*
+     * Trim / from string start and end
+     */
+    var trim = function(s){
+        return s.replace(/^[\/]+|[\/]+$/g, '');
+    }
+
     _.url.gene = function (obj) {
-        return config.prefix + config.version + "/" + prefixGene + obj.gene_id;
+        return getOrigin() + prefixGene + obj.gene_id;
     };
 
     _.url.target = function (obj) {
         if (obj && obj.target_id) {
             // One target
-            return config.prefix + config.version + "/" + prefixTarget + obj.target_id;
+            return getOrigin() + prefixTarget + obj.target_id;
         }
         // Multiple targets (optionally we can specify specific fields)
-        return config.prefix + config.version + "/" + prefixTarget + parseUrlParams(obj);
+        return getOrigin() + prefixTarget + parseUrlParams(obj);
     };
 
     _.url.disease = function (obj) {
-        return config.prefix + config.version + "/" + prefixDisease + obj.code;
+        return getOrigin() + prefixDisease + obj.code;
     };
 
     _.url.search = function (obj) {
-        return config.prefix + config.version + "/" + prefixSearch + parseUrlParams(obj);
+        return getOrigin() + prefixSearch + parseUrlParams(obj);
     };
 
     _.url.associations = function (obj) {
-        return config.prefix + config.version + "/" + prefixAssociations + parseUrlParams(obj);
+        return getOrigin() + prefixAssociations + parseUrlParams(obj);
     };
 
     _.url.filterby = function (obj) {
-        return config.prefix + config.version + "/" + prefixFilterby + parseUrlParams(obj);
+        return getOrigin() + prefixFilterby + parseUrlParams(obj);
     };
 
     _.url.requestToken = function (obj) {
-        return config.prefix + config.version + "/" + prefixToken + "app_name=" + obj.appname + "&secret=" + obj.secret + (credentials.expiry ? ("&expiry=" + credentials.expiry) : "" );
+        return getOrigin() + prefixToken + "app_name=" + obj.appname + "&secret=" + obj.secret + (credentials.expiry ? ("&expiry=" + credentials.expiry) : "" );
     };
 
     _.url.autocomplete = function (obj) {
-        return config.prefix + config.version + "/" + prefixAutocomplete + parseUrlParams(obj);
+        return getOrigin() + prefixAutocomplete + parseUrlParams(obj);
     };
 
     _.url.quickSearch = function (obj) {
-        return config.prefix + config.version + "/" + prefixQuickSearch + parseUrlParams(obj);
+        return getOrigin() + prefixQuickSearch + parseUrlParams(obj);
     };
 
     _.url.expression = function (obj) {
-        return config.prefix + config.version + "/" + prefixExpression + parseUrlParams(obj);
+        return getOrigin() + prefixExpression + parseUrlParams(obj);
     };
 
     _.url.bestHitSearch = function (obj) {
-        return config.prefix + config.version + "/" + prefixMultiSearch + parseUrlParams(obj);
+        return getOrigin() + prefixMultiSearch + parseUrlParams(obj);
     };
 
     _.url.proxy = function (obj) {
-        return config.prefix + config.version + "/" + prefixProxy + obj.url;
+        return getOrigin() + prefixProxy + obj.url;
     };
 
     _.url.targetRelation = function(obj){
-        return config.prefix + config.version + "/" + prefixTargetRelation + obj.id + '?' + parseUrlParams(obj);
+        return getOrigin() + prefixTargetRelation + obj.id + '?' + parseUrlParams(obj);
     };
 
     _.url.diseaseRelation = function(obj){
         var id = obj.id;
         delete(obj.id);
-        return config.prefix + config.version + "/" + prefixDiseaseRelation + id + "?" + parseUrlParams(obj);
+        return getOrigin() + prefixDiseaseRelation + id + "?" + parseUrlParams(obj);
     };
 
     _.url.logSession = function (obj) {
-        return config.prefix + config.version + "/" + prefixLogSession + '?' + parseUrlParams(obj);
+        return getOrigin() + prefixLogSession + '?' + parseUrlParams(obj);
     };
 
     _.url.stats = function () {
-        return config.prefix + config.version + "/" + prefixStats;
+        return getOrigin() + prefixStats;
     };
 
     _.url.targetsEnrichment = function (obj) {
-        return config.prefix + config.version + "/" + prefixTargetsEnrichment + parseUrlParams(obj);
+        return getOrigin() + prefixTargetsEnrichment + parseUrlParams(obj);
     };
 
     /**
