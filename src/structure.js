@@ -1,11 +1,9 @@
-// var tntTreeNode = require("tnt.tree.node");
-
 // Given a flat structure of associations
 // convert and return that structure to a tree
 var rootId = "cttv_root";
 var childrenProperty = "children";
 
-var flat2tree = function (config) { // cProp -- children property
+var flat2tree = function (config, taslist) { // cProp -- children property
     var data;
     if (Array.isArray(config)) {
         data = config;
@@ -36,7 +34,7 @@ var flat2tree = function (config) { // cProp -- children property
         }
     };
 
-    var tas = getTAs(therapeuticAreas);
+    var tas = getTAs(therapeuticAreas, taslist);
 
     for (var i=0; i<sortedAssociations.length; i++) {
         addNode(sortedAssociations[i], tree, tas);
@@ -79,7 +77,8 @@ function addNode (node, tree, tas) {
 
     // If the parent is cttv_root and the node is not a therapeutic area (path.length > 2) we search for the TA in the set of TAs
     if ((parent.__id === rootId) && (path.length > 1)) {
-        var taId = node.target.id + "-" + path[0];
+        // var taId = node.target.id + "-" + path[0];
+        var taId = 'TA-' + path[0];
         var ta = tas[taId];
         if (!ta) {
             console.error("We do not have TA: " + taId);
@@ -117,11 +116,44 @@ function hasTwin (siblings, himself) {
     return false;
 }
 
-function getTAs (arr) {
+/**
+ * Merge list of therapeutic areas from the associations and the full static list of TAs into a map
+ * @param {*} arr array of therapeutic areas for these associations
+ * @param {*} therapeuticareas the static full list of therapeautic areas as returned by the API
+ */
+function getTAs (arr, therapeuticareas) {
+    arr = arr || [];    // avoid 'undefined'-related errors as per some associations
     var tas = {};
+    for (var i=0; i<therapeuticareas.length; i++) {
+        var ta = therapeuticareas[i];
+        // since this is the static list of therapeutic areas, it has only label and code
+        // so we initialize other params as needed
+        // NOTE: the 'TA-' is used to avoid possible errors/conflicts caused by tas names
+        // e.g. on therapeutic area is called 'Function' (to be precise object.Function works
+        // but object.function doesn't as it's a javascript reserved word)
+        tas['TA-'+ta.code] = {
+            id: ta.code,
+            disease: {
+                efo_info: {
+                    label: ta.label
+                },
+                id: ta.code,
+            },
+            association_score: {
+                overall: 0,
+                datatypes: {}
+            },
+            target: {
+                gene_info: {},
+                id: undefined
+            },
+            evidence_count : {}
+        };
+    }
+    // update and override with association-specific TAs
     for (var i=0; i<arr.length; i++) {
         var ta = arr[i];
-        tas[ta.id] = ta;
+        tas['TA-'+ta.disease.id] = ta;
     }
     return tas;
 }
