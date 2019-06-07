@@ -12,8 +12,9 @@ jsonReqHttp = http.use(jsonreq).use(promises(Promise));
 var structure = require("./structure.js");
 
 var cttvApi = function () {
-
     var req; // can be json or not
+
+    var therapeuticareas;   // placeholder for caching therapeutic areas as per API response
 
     var credentials = {
         token : undefined, // is a promise or a string
@@ -198,9 +199,32 @@ var cttvApi = function () {
 
 
     // Utils
+    var flat2tree = function(data){
+        var getPromise = function() {
+            return new Promise (function (resolve) {
+                resolve ({
+                    body: {
+                        data: structure.flat2tree(data, therapeuticareas)
+                    }
+                });
+            });
+        }
+        // if class therapeuticareas is already popuplated, get that, otherwise fetch from API
+        if(therapeuticareas){
+            return getPromise();
+        } else {
+            return _.call(_.url.therapeuticAreas())
+                .then(
+                    function(resp){
+                        therapeuticareas = resp.body.therapeuticareas;
+                        return getPromise();
+                    }
+                )
+        }
+    }
     _.utils = {};
-    _.utils.flat2tree = structure.flat2tree;
-
+    _.utils.flat2tree = flat2tree;
+    
     // URL object
     _.url = {};
 
@@ -222,6 +246,8 @@ var cttvApi = function () {
     var prefixMultiSearch = "private/besthitsearch?";
     var prefixStats = "public/utils/stats";
     var prefixTargetsEnrichment = "private/enrichment/targets?";
+    var prefixTherapeuticAreas = "public/utils/therapeuticareas";
+
 
     /*
      * Returns the "origin" (inspired by window.location.origin) of the url, which is 
@@ -311,6 +337,10 @@ var cttvApi = function () {
 
     _.url.targetsEnrichment = function (obj) {
         return getOrigin() + prefixTargetsEnrichment + parseUrlParams(obj);
+    };
+
+    _.url.therapeuticAreas = function () {
+        return getOrigin() + prefixTherapeuticAreas;
     };
 
     /**
