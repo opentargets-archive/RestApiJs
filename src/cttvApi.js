@@ -247,6 +247,7 @@ var cttvApi = function () {
     var prefixStats = "public/utils/stats";
     var prefixTargetsEnrichment = "private/enrichment/targets?";
     var prefixTherapeuticAreas = "public/utils/therapeuticareas";
+    var prefixDrug = "private/drug/";
 
 
     /*
@@ -341,6 +342,10 @@ var cttvApi = function () {
 
     _.url.therapeuticAreas = function () {
         return getOrigin() + prefixTherapeuticAreas;
+    };
+
+    _.url.drug = function (obj) {
+        return getOrigin() + prefixDrug + obj.id;
     };
 
     /**
