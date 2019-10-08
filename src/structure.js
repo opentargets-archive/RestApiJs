@@ -44,12 +44,28 @@ var flat2tree = function (config, taslist) { // cProp -- children property
 
 function unfoldAssoc (arr) {
     var unfold = [];
+    // 1. loop through all associations
     for (var i=0; i<arr.length; i++) {
         var node = arr[i];
-        if (node.disease.efo_info.path.length > 1) {
-            for (var j=1; j<node.disease.efo_info.path.length; j++) {
+        // if (node.disease.efo_info.path.length > 1) {
+        //     for (var j=1; j<node.disease.efo_info.path.length; j++) {
+        //         var clone = cloneNode(node);
+        //         clone.currPath = node.disease.efo_info.path[j];
+        //         unfold.push(clone);
+        //     }
+        // }
+        // 2. loop through all paths
+        for (var j=0; j<node.disease.efo_info.path.length; j++) {
+            // remove 'disease' TA from each path
+            var p = node.disease.efo_info.path[j];
+            var idx = Math.max(p.indexOf('EFO_0000408'), p.indexOf('efo_0000408'));
+            if (idx >= 0) {
+                p.splice(idx, 1);
+            }
+            // if more than one path, move the extras out
+            if (j > 1) {
                 var clone = cloneNode(node);
-                clone.currPath = node.disease.efo_info.path[j];
+                clone.currPath = p;
                 unfold.push(clone);
             }
         }
@@ -77,24 +93,24 @@ function addNode (node, tree, tas) {
 
     // If the parent is cttv_root and the node is not a therapeutic area (path.length > 2) we search for the TA in the set of TAs
     if ((parent.__id === rootId) && (path.length > 1)) {
-        // var taId = node.target.id + "-" + path[0];
         var taId = 'TA-' + path[0];
         var ta = tas[taId];
-        if (!ta) {
+        if (ta) {    
+            ta.__id = path[0];
+            ta.__name = ta.disease.efo_info.label;
+            ta.name = ta.disease.efo_info.label;
+            ta.label = ta.disease.efo_info.label;
+            ta.__association_score = ta.association_score.overall;
+            ta.__evidence_count = ta.evidence_count.total;
+
+            if (!tree[childrenProperty]) {
+                tree[childrenProperty] = [];
+            }
+            tree[childrenProperty].push(ta);
+            parent = ta;
+        } else {
             console.error("We do not have TA: " + taId);
         }
-        ta.__id = path[0];
-        ta.__name = ta.disease.efo_info.label;
-        ta.name = ta.disease.efo_info.label;
-        ta.label = ta.disease.efo_info.label;
-        ta.__association_score = ta.association_score.overall;
-        ta.__evidence_count = ta.evidence_count.total;
-
-        if (!tree[childrenProperty]) {
-            tree[childrenProperty] = [];
-        }
-        tree[childrenProperty].push(ta);
-        parent = ta;
     }
 
     if (!parent[childrenProperty]) {
@@ -165,12 +181,12 @@ function findParent (path, tree, myself) {
         FINDINCHILDREN:
         for (var j=0; j<children.length; j++) {
             var child = children[j];
-            if ((child.__id === path[i]) && (child.__id !== myself.__id)) {
-                tree = child;
-                children = child[childrenProperty] || [];
-                found = true;
-                break FINDINCHILDREN;
-            }
+                if ((child.__id === path[i]) && (child.__id !== myself.__id)) {
+                    tree = child;
+                    children = child[childrenProperty] || [];
+                    found = true;
+                    break FINDINCHILDREN;
+                }
         }
         if (!found) {
             return tree;
