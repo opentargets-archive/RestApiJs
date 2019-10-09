@@ -47,28 +47,30 @@ function unfoldAssoc (arr) {
     // 1. loop through all associations
     for (var i=0; i<arr.length; i++) {
         var node = arr[i];
-        // if (node.disease.efo_info.path.length > 1) {
-        //     for (var j=1; j<node.disease.efo_info.path.length; j++) {
-        //         var clone = cloneNode(node);
-        //         clone.currPath = node.disease.efo_info.path[j];
-        //         unfold.push(clone);
-        //     }
-        // }
-        // 2. loop through all paths
-        for (var j=0; j<node.disease.efo_info.path.length; j++) {
-            // remove 'disease' TA from each path
-            var p = node.disease.efo_info.path[j];
-            var idx = Math.max(p.indexOf('EFO_0000408'), p.indexOf('efo_0000408'));
-            if (idx >= 0) {
-                p.splice(idx, 1);
-            }
-            // if more than one path, move the extras out
-            if (j > 1) {
+        // 2. loop through extra paths
+        if (node.disease.efo_info.path.length > 1) {
+            for (var j=1; j<node.disease.efo_info.path.length; j++) {
                 var clone = cloneNode(node);
-                clone.currPath = p;
+                clone.currPath = node.disease.efo_info.path[j];
                 unfold.push(clone);
             }
         }
+        // 2. loop through all paths and remove 'disease' therapeutic area
+        // Note: this is no longer needed with the fixed EFO3 data
+        // for (var j=0; j<node.disease.efo_info.path.length; j++) {
+        //     // remove 'disease' TA from each path
+        //     var p = node.disease.efo_info.path[j];
+        //     var idx = Math.max(p.indexOf('EFO_0000408'), p.indexOf('efo_0000408'));
+        //     if (idx >= 0) {
+        //         p.splice(idx, 1);
+        //     }
+        //     // if more than one path, move the extras out
+        //     if (j > 1) {
+        //         var clone = cloneNode(node);
+        //         clone.currPath = p;
+        //         unfold.push(clone);
+        //     }
+        // }
         node.currPath = node.disease.efo_info.path[0];
 
         unfold.push(node);
